@@ -1,40 +1,57 @@
 #!/usr/bin/node
+const request = require('request');
+
 /**
- * Wrapper function for request object that allows it
- * to work with async and await
- * @param   {String} url - site url
- * @returns {Promise}    - promise object that resolves
- *                         with parsed JSON response
- *                         and rejects with the request error.
+ * Wrapper function for making HTTP GET requests
+ * @param   {String} url - URL for the GET request
+ * @returns {Promise}    - Promise that resolves with parsed JSON response
+ *                          or rejects with the request error.
  */
-function makeRequest (url) {
-  const request = require('request');
+function makeRequest(url) {
   return new Promise((resolve, reject) => {
     request.get(url, (error, response, body) => {
-      if (error) reject(error);
-      else resolve(JSON.parse(body));
+      if (error) {
+        reject(error);
+      } else {
+        try {
+          resolve(JSON.parse(body));
+        } catch (parseError) {
+          reject(parseError);
+        }
+      }
     });
   });
 }
 
 /**
  * Entry point - makes requests to Star Wars API
- * for movie info based movie ID passed as a CLI parameter.
+ * for movie info based on the movie ID passed as a CLI parameter.
  * Retrieves movie character info then prints their names
  * in order of appearance in the initial response.
  */
-async function main () {
-  const args = process.argv;
+async function main() {
+  const [,, movieId] = process.argv;
 
-  if (args.length < 3) return;
+  if (!movieId) {
+    console.error('Please provide a movie ID.');
+    return;
+  }
 
-  const movieUrl = 'https://swapi-api.alx-tools.com/api/films/' + args[2];
-  const movie = await makeRequest(movieUrl);
+  const movieUrl = `https://swapi-api.alx-tools.com/api/films/${movieId}`;
+  try {
+    const movie = await makeRequest(movieUrl);
 
-  if (movie.characters === undefined) return;
-  for (const characterUrl of movie.characters) {
-    const character = await makeRequest(characterUrl);
-    console.log(character.name);
+    if (!movie.characters || movie.characters.length === 0) {
+      console.error('No characters found for this movie.');
+      return;
+    }
+
+    for (const characterUrl of movie.characters) {
+      const character = await makeRequest(characterUrl);
+      console.log(character.name);
+    }
+  } catch (err) {
+    console.error('Error:', err.message);
   }
 }
 
