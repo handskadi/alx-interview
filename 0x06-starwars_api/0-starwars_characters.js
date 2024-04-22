@@ -7,8 +7,8 @@
  *                         with parsed JSON response
  *                         and rejects with the request error.
  */
-function makeRequest (url) {
-  const request = require('request');
+function makeRequest(url) {
+  const request = require("request");
   return new Promise((resolve, reject) => {
     request.get(url, (error, response, body) => {
       if (error) reject(error);
@@ -23,12 +23,12 @@ function makeRequest (url) {
  * Retrieves movie character info then prints their names
  * in order of appearance in the initial response.
  */
-async function main () {
+async function main() {
   const args = process.argv;
 
   if (args.length < 3) return;
 
-  const movieUrl = 'https://swapi-api.alx-tools.com/api/films/' + args[2];
+  const movieUrl = "https://swapi-api.alx-tools.com/api/films/" + args[2];
   const movie = await makeRequest(movieUrl);
 
   if (movie.characters === undefined) return;
@@ -39,3 +39,4 @@ async function main () {
 }
 
 main();
+cots me =""
